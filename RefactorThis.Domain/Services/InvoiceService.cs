@@ -1,10 +1,9 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using RefactorThis.Domain.Entities;
 using RefactorThis.Domain.Interfaces;
-using RefactorThis.Persistence.Entities;
 using RefactorThis.Persistence.Enums;
-using RefactorThis.Persistence.Interfaces;
 
 namespace RefactorThis.Domain
 {
@@ -17,12 +16,12 @@ namespace RefactorThis.Domain
             _invoiceRepository = invoiceRepository;
         }
 
-        public async Task<string> ProcessPayment(Payment payment)
+        public async Task<string> ProcessPaymentAsync(Payment payment)
         {
             var invoice = await _invoiceRepository.GetInvoice(payment.Reference);
             if (invoice == null)
             {
-                throw new InvalidOperationException("There is no invoice matching this payment.");
+                throw new InvalidOperationException("There is no invoice matching this payment");
             }
 
             if (invoice.Amount == 0)
@@ -45,7 +44,7 @@ namespace RefactorThis.Domain
                 return "No payment needed.";
             }
 
-            throw new InvalidOperationException("The invoice is in an invalid state: it has an amount of 0 and existing payments.");
+            throw new InvalidOperationException("The invoice is in an invalid state: it has an amount of 0 and existing payments");
         }
 
         private string HandleExistingPayments(Invoice invoice, Payment payment)
@@ -54,12 +53,12 @@ namespace RefactorThis.Domain
 
             if (totalPaid == invoice.Amount)
             {
-                return "Invoice was already fully paid.";
+                return "Invoice was already fully paid";
             }
 
             if (payment.Amount > (invoice.Amount - totalPaid))
             {
-                return "The payment is greater than the partial amount remaining.";
+                return "The payment is greater than the partial amount remaining";
             }
 
             return ProcessPartialPayment(invoice, payment);
@@ -69,7 +68,7 @@ namespace RefactorThis.Domain
         {
             if (payment.Amount > invoice.Amount)
             {
-                return "The payment is greater than the invoice amount.";
+                return "The payment is greater than the invoice amount";
             }
 
             if (payment.Amount == invoice.Amount)
@@ -94,21 +93,21 @@ namespace RefactorThis.Domain
         {
             ApplyPayment(invoice, payment);
             invoice.AmountPaid += payment.Amount;
-            return "Final partial payment received, invoice is now fully paid.";
+            return "Final partial payment received, invoice is now fully paid";
         }
 
         private string AddPartialPayment(Invoice invoice, Payment payment)
         {
             ApplyPayment(invoice, payment);
             invoice.AmountPaid += payment.Amount;
-            return "Another partial payment received, still not fully paid.";
+            return "Another partial payment received, still not fully paid";
         }
 
         private string MarkInvoiceAsPartiallyPaid(Invoice invoice, Payment payment)
         {
             ApplyPayment(invoice, payment);
             invoice.AmountPaid = payment.Amount;
-            return "Invoice is now partially paid.";
+            return "Invoice is now partially paid";
         }
 
         private void ApplyPayment(Invoice invoice, Payment payment)

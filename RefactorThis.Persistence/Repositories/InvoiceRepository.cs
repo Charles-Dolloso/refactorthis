@@ -1,26 +1,38 @@
-using RefactorThis.Persistence.Entities;
-using RefactorThis.Persistence.Interfaces;
-using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
+using RefactorThis.Domain.Entities;
+using RefactorThis.Domain.Interfaces;
+using RefactorThis.Persistence.Context;
 
 namespace RefactorThis.Persistence.Repositories
 {
     public class InvoiceRepository : IInvoiceRepository
     {
-        private Invoice _invoice;
+        private readonly InvoiceDBContext _context;
 
-        public async Task<Invoice> GetInvoice(string reference)
+        public InvoiceRepository(InvoiceDBContext context)
         {
-            return _invoice;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+        }
+
+        public async Task<Invoice?> GetInvoice(string reference)
+        {
+            var payment = await _context.Payments.Include(i => i.Invoice).Where(c => c.Reference == reference).FirstOrDefaultAsync();
+            if (payment != null)
+            {
+                return payment.Invoice;
+            }
+
+            return null;
         }
 
         public async Task SaveInvoice(Invoice invoice)
         {
-            //saves the invoice to the database
+            await _context.SaveChangesAsync();
         }
 
         public async Task Add(Invoice invoice)
         {
-            _invoice = invoice;
+            await _context.AddAsync(invoice);
         }
     }
 }

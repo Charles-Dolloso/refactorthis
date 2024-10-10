@@ -1,4 +1,4 @@
-﻿using RefactorThis.Persistence.Entities;
+﻿using RefactorThis.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,6 +9,6 @@ namespace RefactorThis.Domain.Interfaces
 {
     public interface IInvoiceService
     {
-        Task<string> ProcessPayment(Payment payment);
+        Task<string> ProcessPaymentAsync(Payment payment);
     }
 }
